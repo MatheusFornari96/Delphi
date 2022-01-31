@@ -1,0 +1,39 @@
+object dmConexao: TdmConexao
+  OldCreateOrder = False
+  Height = 225
+  Width = 518
+  object FDTransaction1: TFDTransaction
+    Left = 48
+    Top = 112
+  end
+  object FDTable1: TFDTable
+    Left = 152
+    Top = 32
+  end
+  object FDGUIxWaitCursor1: TFDGUIxWaitCursor
+    Provider = 'Forms'
+    Left = 152
+    Top = 112
+  end
+  object FDPhysMSSQLDriverLink1: TFDPhysMSSQLDriverLink
+    VendorLib = 
+      'D:\TESTES TECNICOS\TESTE PLENO\Projeto\Win32\Debug\dbexpsda40.dl' +
+      'l'
+    Left = 256
+    Top = 40
+  end
+  object DataSource1: TDataSource
+    Left = 360
+    Top = 160
+  end
+  object FDConnection1: TFDConnection
+    Params.Strings = (
+      'User_Name=sa'
+      'Password=root'
+      'ConnectionDef=TESTE_VISUALSOFTWARE'
+      'Server=PC-FORNARI\EXPRESS')
+    LoginPrompt = False
+    Left = 40
+    Top = 40
+  end
+end

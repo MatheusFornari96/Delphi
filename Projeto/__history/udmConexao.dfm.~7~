@@ -1,0 +1,14 @@
+object dmConexao: TdmConexao
+  OldCreateOrder = False
+  Height = 225
+  Width = 518
+  object FDConnection1: TFDConnection
+    Left = 200
+    Top = 56
+  end
+  object FDQuery1: TFDQuery
+    Connection = FDConnection1
+    Left = 328
+    Top = 112
+  end
+end

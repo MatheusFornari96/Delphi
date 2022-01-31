@@ -1,0 +1,87 @@
+unit pesLogin;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
+  System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Data.DB, FireDAC.Stan.Intf,
+  FireDAC.Stan.Option, FireDAC.Stan.Param, FireDAC.Stan.Error, FireDAC.DatS,
+  FireDAC.Phys.Intf, FireDAC.DApt.Intf, FireDAC.Stan.Async, FireDAC.DApt,
+  FireDAC.Comp.DataSet, FireDAC.Comp.Client, Vcl.Grids, Vcl.DBGrids,
+  Vcl.StdCtrls, Vcl.ExtCtrls;
+
+type
+  TForm8 = class(TForm)
+    Panel1: TPanel;
+    Panel2: TPanel;
+    button_pesquisar: TButton;
+    edit_pesquisa: TEdit;
+    Label1: TLabel;
+    DBGrid1: TDBGrid;
+    DataSource1: TDataSource;
+    FDQuery1: TFDQuery;
+    button_limpa: TButton;
+    button_voltar: TButton;
+    procedure button_pesquisarClick(Sender: TObject);
+    procedure button_limpaClick(Sender: TObject);
+    procedure button_voltarClick(Sender: TObject);
+    procedure edit_pesquisaKeyUp(Sender: TObject; var Key: Word;
+      Shift: TShiftState);
+    procedure DBGrid1DblClick(Sender: TObject);
+  private
+    function existe_nome(codigo: string): Boolean;
+  public
+    { Public declarations }
+  end;
+
+var
+  Form8: TForm8;
+
+implementation
+
+{$R *.dfm}
+
+uses Unit7, Unit3;
+
+procedure TForm8.button_limpaClick(Sender: TObject);
+begin
+  FDQuery1.Close;
+  edit_pesquisa.Clear;
+end;
+
+procedure TForm8.button_pesquisarClick(Sender: TObject);
+begin
+  existe_nome(edit_pesquisa.Text);
+end;
+
+procedure TForm8.button_voltarClick(Sender: TObject);
+begin
+  Form8.Close;
+end;
+
+procedure TForm8.DBGrid1DblClick(Sender: TObject);
+begin
+  if not FDQuery1.IsEmpty then
+    ModalResult := mrOk;
+end;
+
+procedure TForm8.edit_pesquisaKeyUp(Sender: TObject; var Key: Word;
+  Shift: TShiftState);
+var
+  excist: TFDQuery;
+  sql: String;
+begin
+  sql := 'SELECT * FROM usuario WHERE nome LIKE "%' + edit_pesquisa.Text + '%"';
+  DataModule7.ExecSQL(sql, FDQuery1);
+end;
+
+function TForm8.existe_nome(codigo: string): Boolean;
+var
+  excist: TFDQuery;
+begin
+  DataModule7.ExecSQL('SELECT id, login, nome, ' + ' senha ' + 'FROM usuario ',
+    FDQuery1);
+end;
+
+end.

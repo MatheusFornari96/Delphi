@@ -1,0 +1,37 @@
+unit udmConexao;
+
+interface
+
+uses
+  System.SysUtils, System.Classes, Data.DBXMSSQL, Data.DB, Data.SqlExpr,
+  FireDAC.Phys.MSSQLDef, FireDAC.Stan.Intf, FireDAC.Phys, FireDAC.Phys.ODBCBase,
+  FireDAC.Phys.MSSQL, FireDAC.Stan.Option, FireDAC.Stan.Param,
+  FireDAC.Stan.Error, FireDAC.DatS, FireDAC.Phys.Intf, FireDAC.DApt.Intf,
+  FireDAC.Stan.Async, FireDAC.DApt, FireDAC.UI.Intf, FireDAC.VCLUI.Wait,
+  FireDAC.Stan.Def, FireDAC.Stan.Pool, FireDAC.Comp.Client, FireDAC.Comp.UI,
+  FireDAC.Comp.DataSet;
+
+type
+  TdmConexao = class(TDataModule)
+    FDTransaction1: TFDTransaction;
+    FDTable1: TFDTable;
+    FDGUIxWaitCursor1: TFDGUIxWaitCursor;
+    FDPhysMSSQLDriverLink1: TFDPhysMSSQLDriverLink;
+    DataSource1: TDataSource;
+    FDConnection1: TFDConnection;
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  dmConexao: TdmConexao;
+
+implementation
+
+{%CLASSGROUP 'Vcl.Controls.TControl'}
+
+{$R *.dfm}
+
+end.

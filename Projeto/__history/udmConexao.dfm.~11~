@@ -1,0 +1,23 @@
+object dmConexao: TdmConexao
+  OldCreateOrder = False
+  OnCreate = DataModuleCreate
+  Height = 225
+  Width = 518
+  object FDConnection1: TFDConnection
+    Params.Strings = (
+      'Database=TESTE_VISUALSOFTWARE'
+      'User_Name=sa'
+      'Password=root'
+      'Server=localhost\SQLEXPRESS'
+      'DriverID=MSSQL')
+    Connected = True
+    LoginPrompt = False
+    Left = 80
+    Top = 88
+  end
+  object FDQuery1: TFDQuery
+    Connection = FDConnection1
+    Left = 352
+    Top = 120
+  end
+end

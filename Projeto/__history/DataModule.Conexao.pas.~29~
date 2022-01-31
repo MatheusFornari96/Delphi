@@ -1,0 +1,271 @@
+unit DataModule.Conexao;
+
+interface
+
+uses
+	FireDAC.Stan.Intf,
+	FireDAC.Stan.Option,
+	FireDAC.Stan.Error,
+	FireDAC.UI.Intf,
+	FireDAC.Phys.Intf,
+	FireDAC.Stan.Def,
+	FireDAC.Phys,
+	FireDAC.Phys.MySQLDef,
+	FireDAC.Phys.MySQL,
+	FireDAC.Comp.Client,
+	FireDAC.Stan.Param,
+	FireDAC.DatS,
+	FireDAC.DApt.Intf,
+	Data.DB,
+	FireDAC.Comp.DataSet,
+	FireDAC.Stan.Async,
+	FireDAC.DApt,
+	FireDAC.VCLUI.Wait,
+	FireDAC.Comp.UI,
+	System.IniFiles,
+	FireDAC.Stan.Pool,
+	System.Classes, FireDAC.Phys.MSSQL, FireDAC.Phys.MSSQLDef,
+  FireDAC.Phys.ODBCBase;
+
+type
+	TConexaoINI = record
+		DBServer : String;
+		DBName : String;
+		DBPort : Integer;
+		DBUser : String;
+		DBPassword : String;
+	end;
+
+type
+	TDataModuleConexao = class(TDataModule)
+		FDMemTable1 : TFDMemTable;
+		FDQuery1 : TFDQuery;
+		FDGUIxWaitCursor1 : TFDGUIxWaitCursor;
+		FDConnection1 : TFDConnection;
+    FDManager1: TFDManager;
+    FDPhysMSSQLDriverLink1: TFDPhysMSSQLDriverLink;
+		procedure DataModuleCreate(Sender : TObject);
+		private
+			function ExtrairArquivoInterno : Boolean;
+		public
+			function ExecSQL(strSQL : string; const ZQueryParam : TFDMemTable = nil) : Boolean;
+			function BeginTrans : Boolean;
+			function CommitTrans : Boolean;
+			function RollBackTrans : Boolean;
+	end;
+
+function LeiaConfigINI : Boolean;
+// function EscrevaConfigINI(configIni : TConexaoINI) : Boolean;
+
+var
+	DataModuleConexao : TDataModuleConexao;
+	configIni         : TConexaoINI;
+
+const
+	INI : String = 'visual.ini';
+	LIBMYSQL : String = 'libmysql.dll';
+	SELECT : String = 'SELECT';
+
+implementation
+
+uses
+	System.SysUtils,
+	Vcl.Forms,
+	System.Types;
+
+{%CLASSGROUP 'Vcl.Controls.TControl'}
+
+{$R *.dfm}
+
+
+function LeiaConfigINI : Boolean;
+var
+	oIniFile : TIniFile;
+begin
+	Result   := False;
+	oIniFile := TIniFile.Create(ExtractFilePath(Application.ExeName) + INI);
+	try
+		configIni.DBServer   := oIniFile.ReadString('CONEXAO',  'DBServer', '');
+		configIni.DBName     := oIniFile.ReadString('CONEXAO',  'DBName', '');
+		configIni.DBPort     := oIniFile.ReadInteger('CONEXAO', 'DBPort', 1433);
+		configIni.DBUser     := oIniFile.ReadString('CONEXAO',  'DBUser', '');
+		configIni.DBPassword := oIniFile.ReadString('CONEXAO',  'DBPassword', '');
+		Result               := True;
+	finally
+		FreeAndNil(oIniFile);
+	end;
+
+end;
+
+function TDataModuleConexao.BeginTrans: Boolean;
+begin
+	if FDConnection1.Connected then
+  	if not FDConnection1.InTransaction then
+	  	FDConnection1.StartTransaction
+end;
+
+function TDataModuleConexao.CommitTrans: Boolean;
+begin
+  if FDConnection1.Connected then
+    if FDConnection1.InTransaction then
+      FDConnection1.Commit;
+end;
+
+procedure TDataModuleConexao.DataModuleCreate(Sender : TObject);
+var
+	oParams : TStrings;
+begin
+	oParams := TStringList.Create;
+	try
+		if (LeiaConfigINI) then
+		begin
+
+			oParams.Add('Server=' + configIni.DBServer);
+			oParams.Add('Database=' + configIni.DBName);
+			oParams.Add('Port=' + configIni.DBPort.ToString);
+			oParams.Add('User_Name=' + configIni.DBUser);
+			oParams.Add('Password=' + configIni.DBPassword);
+
+      FDConnection1.DriverName := 'MSSQL';
+      FDConnection1.Params.Add('DriverID=MSSQL');
+      FDConnection1.Params.DriverID :=  'MSSQL';
+			FDConnection1.FetchOptions.Mode := fmAll;
+			FDConnection1.Connected         := False;
+			FDConnection1.LoginPrompt       := False;
+			FDConnection1.Params.Clear;
+
+			FDManager1.Active := False;
+			FDManager1.ConnectionCount;
+			FDManager1.Active := True;
+
+			FDConnection1.Connected         := True;
+		end;
+	finally
+		FreeAndNil(oParams);
+	end;
+end;
+
+function TDataModuleConexao.ExecSQL(strSQL : string; const ZQueryParam : TFDMemTable) : Boolean;
+var
+	//FDConnectionOnly : TFDConnection;
+	fdQueryT         : TFDQuery;
+	vs_SQLT          : string;
+begin
+	Result := False;
+	if not FDManager1.Active then
+		Exit;
+
+	try
+		fdQueryT := TFDQuery.Create(nil);
+		try
+			vs_SQLT := Trim(strSQL);
+			//FDConnectionOnly := TFDConnection.Create(nil);
+			//FDConnectionOnly.ConnectionDefName := 'MySQL_Pooled';
+			fdQueryT.Connection                := FDConnection1; //FDConnectionOnly;
+  		fdQueryT.Close;
+			fdQueryT.SQL.Clear;
+			fdQueryT.SQL.Add(vs_SQLT);
+
+			if (Pos(SELECT, Trim(UpperCase(vs_SQLT))) in [1, 2]) then
+			begin
+//				if not (FDConnectionOnly.Connected) then
+//				begin
+//					FDConnectionOnly.Connected := True;
+//					fdQueryT.Prepare;
+//					fdQueryT.Open;
+//					if ZQueryParam <> nil then
+//					begin
+//						ZQueryParam.Close;
+//						ZQueryParam.Data := fdQueryT.Data;
+//					end;
+//					FDConnectionOnly.Connected := False;
+//				end else
+//				begin
+//					fdQueryT.Prepare;
+//					fdQueryT.Open;
+//					if ZQueryParam <> nil then
+//					begin
+//						ZQueryParam.Close;
+//						ZQueryParam.Data := fdQueryT.Data;
+//					end;
+//				end;
+          if not (FDConnection1.Connected) then
+					begin
+						FDConnection1.Connected := True;
+						fdQueryT.Prepare;
+						fdQueryT.Open;
+						if ZQueryParam <> nil then
+						begin
+							ZQueryParam.Close;
+							ZQueryParam.Data := fdQueryT.Data;
+						end;
+						FDConnection1.Connected := False;
+					end else
+					begin
+						fdQueryT.Prepare;
+						fdQueryT.Open;
+						if ZQueryParam <> nil then
+						begin
+							ZQueryParam.Close;
+							ZQueryParam.Data := fdQueryT.Data;
+						end;
+					end;
+			end else
+			begin
+//				FDConnectionOnly.StartTransaction;
+//				fdQueryT.Prepare;
+//				fdQueryT.ExecSQL;
+//				FDConnectionOnly.Commit;
+					fdQueryT.Prepare;
+					fdQueryT.ExecSQL;
+			end;
+    finally
+      fdQueryT.Free;
+    end;
+    Result := True;
+  except
+    on E : Exception do
+    begin
+      Result := False;
+      Raise;
+    end;
+  end;
+end;
+
+function TDataModuleConexao.ExtrairArquivoInterno : Boolean;
+var
+	X   : string;
+	RSX : TResourceStream;
+	FSX : TFileStream;
+begin
+
+	try
+		RSX := TResourceStream.Create(HInstance, 'libmysql', RT_RCDATA);
+		X   := ExtractFilePath(Application.ExeName) + LIBMYSQL;
+		try
+			try
+				FSX := TFileStream.Create(X, fmCreate);
+				RSX.SaveToStream(FSX);
+			except
+			end;
+		finally
+			FreeAndNil(RSX);
+			FreeAndNil(FSX);
+		end;
+		Result := True;
+	except
+		on E : Exception do
+		begin
+			Result := False;
+		end;
+	end;
+end;
+
+function TDataModuleConexao.RollBackTrans: Boolean;
+begin
+  if FDConnection1.Connected then
+    if FDConnection1.InTransaction then
+      FDConnection1.Rollback;
+end;
+
+end.

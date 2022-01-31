@@ -1,0 +1,30 @@
+unit MCadUnMedida;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls, Vcl.StdCtrls, Vcl.Buttons;
+
+type
+  TForm_CadUnMedida = class(TForm)
+    Panel1: TPanel;
+    Panel2: TPanel;
+    BitBtn_Confirmar: TBitBtn;
+    BitBtn_cancelar: TBitBtn;
+    BitBtn4: TBitBtn;
+    BitBtn_excluir: TBitBtn;
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  Form_CadUnMedida: TForm_CadUnMedida;
+
+implementation
+
+{$R *.dfm}
+
+end.
